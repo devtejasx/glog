@@ -1234,9 +1234,18 @@ void LogFileObject::Write(
           << PrettyDuration(
                  std::chrono::duration_cast<std::chrono::duration<int>>(
                      timestamp - start_time_))
-          << '\n'
-          << "Log line format: [IWEF]" << date_time_format << " "
-          << "threadid file:line] msg" << '\n';
+          << '\n';
+      // The built-in description is only accurate when glog formats the
+      // prefix itself. Once a custom formatter is installed glog cannot know
+      // what the prefix contains, so naming [IWEF], the timestamp and the
+      // thread id advertises fields the formatter may never emit.
+      if (g_prefix_formatter == nullptr) {
+        file_header_stream << "Log line format: [IWEF]" << date_time_format
+                           << " " << "threadid file:line] msg" << '\n';
+      } else {
+        file_header_stream << "Log line format: <custom prefix formatter>"
+                           << '\n';
+      }
       const string& file_header_string = file_header_stream.str();
 
       const size_t header_len = file_header_string.size();
