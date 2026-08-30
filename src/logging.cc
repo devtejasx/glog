@@ -1402,12 +1402,15 @@ bool LogCleaner::IsLogFromCurrentProject(
 
   size_t real_filepath_size = filepath.size();
   for (char c : base_filename) {
-    if (cleaned_base_filename.empty()) {
-      cleaned_base_filename += c;
-    } else if (std::find(possible_dir_delim, dir_delim_end, c) ==
-                   dir_delim_end ||
-               (!cleaned_base_filename.empty() &&
-                c != cleaned_base_filename[cleaned_base_filename.size() - 1])) {
+    const bool is_dir_delim =
+        std::find(possible_dir_delim, dir_delim_end, c) != dir_delim_end;
+    // Collapse a repeated delimiter, but never the one at index 1: a leading
+    // "\\" introduces a UNC or extended-length path, and the file paths this
+    // is compared against keep it.
+    const bool duplicate_dir_delim =
+        is_dir_delim && cleaned_base_filename.size() > 1 &&
+        c == cleaned_base_filename[cleaned_base_filename.size() - 1];
+    if (!duplicate_dir_delim) {
       cleaned_base_filename += c;
     }
   }
