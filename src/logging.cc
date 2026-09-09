@@ -1194,7 +1194,12 @@ void LogFileObject::Write(
       // until we succeed or run out of options
       bool success = false;
       for (const auto& log_dir : log_dirs) {
-        base_filename_ = log_dir + "/" + stripped_filename;
+        // Every entry of GetLoggingDirectories() already ends with a directory
+        // delimiter. Adding another one produced "dir//name" on POSIX and
+        // "dir\/name" on Windows; LogCleaner enumerates "dir\name" and only
+        // collapses repeats of the *same* delimiter, so the mixed pair left it
+        // unable to recognise its own log files.
+        base_filename_ = log_dir + stripped_filename;
         if (CreateLogfile(time_pid_string)) {
           success = true;
           break;
@@ -2323,8 +2328,18 @@ const vector<string>& GetLoggingDirectories() {
       GetTempDirectories(*logging_directories_list);
 #ifdef GLOG_OS_WINDOWS
       char tmp[MAX_PATH];
-      if (GetWindowsDirectoryA(tmp, MAX_PATH))
-        logging_directories_list->push_back(tmp);
+      // GetWindowsDirectory does not end the path with a backslash unless the
+      // Windows directory is a drive root, and every other entry here is
+      // terminated, so add one.
+      if (GetWindowsDirectoryA(tmp, MAX_PATH)) {
+        string windows_dir = tmp;
+        if (std::find(std::begin(possible_dir_delim),
+                      std::end(possible_dir_delim),
+                      windows_dir.back()) == std::end(possible_dir_delim)) {
+          windows_dir += "\\";
+        }
+        logging_directories_list->push_back(windows_dir);
+      }
       logging_directories_list->push_back(".\\");
 #else
       logging_directories_list->push_back("./");
