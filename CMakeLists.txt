@@ -564,6 +564,14 @@ if (BUILD_TESTING)
 
   target_link_libraries (logging_unittest PRIVATE glog_test)
 
+  add_executable (logtostdout_unittest
+    src/logtostdout_unittest.cc
+  )
+
+  target_link_libraries (logtostdout_unittest PRIVATE glog_test)
+
+  add_test (NAME logtostdout COMMAND logtostdout_unittest)
+
   add_executable (stl_logging_unittest
     src/stl_logging_unittest.cc
   )
