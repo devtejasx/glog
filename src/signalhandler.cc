@@ -278,6 +278,14 @@ void InvokeDefaultSignalHandler(int signal_number) {
   sigemptyset(&sig_action.sa_mask);
   sig_action.sa_handler = SIG_DFL;
   sigaction(signal_number, &sig_action, nullptr);
+  // The kernel discards a signal a process sends itself while its disposition
+  // is SIG_DFL if the process is the init of its PID namespace, e.g. the
+  // entrypoint of a container. kill() would then be a no-op and the process
+  // would keep running, so terminate with the status a shell reports for a
+  // process killed by the signal.
+  if (getpid() == 1) {
+    _exit(128 + signal_number);
+  }
   kill(getpid(), signal_number);
 #elif defined(GLOG_OS_WINDOWS)
   signal(signal_number, SIG_DFL);
