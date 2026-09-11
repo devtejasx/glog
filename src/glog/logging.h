@@ -494,14 +494,16 @@ class LogMessage;
 using CustomPrefixCallback
     [[deprecated("Use PrefixFormatterCallback instead.")]] =
         void (*)(std::ostream&, const LogMessageInfo&, void*);
+// MSVC, unlike GCC and Clang, also warns (C4996) about the use of the
+// deprecated CustomPrefixCallback within this deprecated declaration.
+[[deprecated("Use InstallPrefixFormatter instead.")]] GLOG_EXPORT void
+InitGoogleLogging(const char* argv0, CustomPrefixCallback prefix_callback,
+                  void* prefix_callback_data = nullptr);
 #if defined(__GNUG__)
 #  pragma GCC diagnostic pop
 #elif defined(_MSC_VER)
 #  pragma warning(pop)
 #endif  // __GNUG__
-[[deprecated("Use InstallPrefixFormatter instead.")]] GLOG_EXPORT void
-InitGoogleLogging(const char* argv0, CustomPrefixCallback prefix_callback,
-                  void* prefix_callback_data = nullptr);
 
 // Check if google's logging library has been initialized.
 GLOG_EXPORT bool IsGoogleLoggingInitialized();
