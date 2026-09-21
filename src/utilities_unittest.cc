@@ -44,6 +44,55 @@ TEST(utilities, InitGoogleLoggingDeathTest) {
   ASSERT_DEATH(InitGoogleLogging("foobar"), "");
 }
 
+namespace {
+class CountingSink : public google::LogSink {
+ public:
+  void send(LogSeverity /*severity*/, const char* /*full_filename*/,
+            const char* /*base_filename*/, int /*line*/,
+            const LogMessageTime& /*time*/, const char* /*message*/,
+            size_t /*message_len*/) override {
+    ++count;
+  }
+
+  int count = 0;
+};
+
+template <typename Log>
+int CountEmitted(int iterations, Log log) {
+  CountingSink sink;
+  google::AddLogSink(&sink);
+  for (int i = 0; i < iterations; ++i) {
+    log(i);
+  }
+  google::RemoveLogSink(&sink);
+  return sink.count;
+}
+}  // namespace
+
+// LOG_IF_EVERY_N used to compute "% n", so n == 0 divided by zero. It now
+// counts the same way as LOG_EVERY_N. Each macro keeps its counter in a
+// static at its call site, so every case gets its own call sites.
+TEST(LogEveryN, IfEveryNMatchesEveryN) {
+  EXPECT_EQ(CountEmitted(7, [](int) { LOG_IF_EVERY_N(INFO, true, 1) << "x"; }),
+            CountEmitted(7, [](int) { LOG_EVERY_N(INFO, 1) << "x"; }));
+  EXPECT_EQ(CountEmitted(7, [](int) { LOG_IF_EVERY_N(INFO, true, 2) << "x"; }),
+            CountEmitted(7, [](int) { LOG_EVERY_N(INFO, 2) << "x"; }));
+  EXPECT_EQ(CountEmitted(7, [](int) { LOG_IF_EVERY_N(INFO, true, 3) << "x"; }),
+            3);
+}
+
+TEST(LogEveryN, IfEveryNWithZeroPeriodDoesNotCrash) {
+  EXPECT_EQ(CountEmitted(5, [](int) { LOG_IF_EVERY_N(INFO, true, 0) << "x"; }),
+            CountEmitted(5, [](int) { LOG_EVERY_N(INFO, 0) << "x"; }));
+}
+
+TEST(LogEveryN, IfEveryNCountsOnlyWhenConditionHolds) {
+  // Iterations 0, 2, 4, 6 pass the condition; every second of those logs.
+  EXPECT_EQ(CountEmitted(
+                8, [](int i) { LOG_IF_EVERY_N(INFO, i % 2 == 0, 2) << "x"; }),
+            2);
+}
+
 int main(int argc, char** argv) {
   InitGoogleLogging(argv[0]);
   InitGoogleTest(&argc, argv);
