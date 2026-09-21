@@ -93,6 +93,7 @@ IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: vlog 0 on
 IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: log
 IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: vlog 1 on
 IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: vlog 2 on
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: dvlog 1 on
 IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: Test: v=0 stderrthreshold=0 logtostderr=0 alsologtostderr=0
 IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: vlog -1
 IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: vlog 0

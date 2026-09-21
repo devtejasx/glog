@@ -140,16 +140,19 @@ namespace google {
     }                                                             \
   } while (0)
 
-// Debug versions of RAW_LOG and RAW_CHECK
+// Debug versions of RAW_LOG, RAW_VLOG and RAW_CHECK
 #ifndef NDEBUG
 
 #  define RAW_DLOG(severity, ...) RAW_LOG(severity, __VA_ARGS__)
+#  define RAW_DVLOG(verboselevel, ...) RAW_VLOG(verboselevel, __VA_ARGS__)
 #  define RAW_DCHECK(condition, message) RAW_CHECK(condition, message)
 
 #else  // NDEBUG
 
 #  define RAW_DLOG(severity, ...) \
     while (false) RAW_LOG(severity, __VA_ARGS__)
+#  define RAW_DVLOG(verboselevel, ...) \
+    while (false) RAW_VLOG(verboselevel, __VA_ARGS__)
 #  define RAW_DCHECK(condition, message) \
     while (false) RAW_CHECK(condition, message)
 

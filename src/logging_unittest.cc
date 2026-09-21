@@ -423,6 +423,13 @@ void TestRawLogging() {
   RAW_VLOG(3, "vlog 3 off");
 
 #if defined(NDEBUG)
+  RAW_VLOG(1, "dvlog 1 on");  // so that have same stderr to compare
+#else
+  RAW_DVLOG(1, "dvlog 1 on");  // test RAW_DVLOG in debug mode
+#endif
+  RAW_DVLOG(3, "dvlog 3 off");
+
+#if defined(NDEBUG)
   RAW_DCHECK(1 == 2, " RAW_DCHECK's shouldn't be compiled in normal mode");
 #endif
 
