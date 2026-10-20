@@ -289,8 +289,9 @@ static const char* SymbolizeStackConsumption(void* pc, int* stack_consumed) {
 }
 
 #      if !defined(HAVE___CXA_DEMANGLE)
-#        ifdef __ppc64__
-// Symbolize stack consumption should be within 4kB.
+#        if defined(__ppc64__) || defined(__aarch64__)
+// Symbolize stack consumption should be within 4kB. Frames are larger on
+// these targets, and 2kB fails there.
 constexpr int kStackConsumptionUpperLimit = 4096;
 #        else
 // Symbolize stack consumption should be within 2kB.
