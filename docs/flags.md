@@ -36,6 +36,23 @@ The following flags are most commonly used:
 
 :   Log messages to `stderr` instead of logfiles.
 
+`logtostdout` (`bool`, default=`false`)
+
+:   Log messages to `stdout` instead of logfiles. Takes precedence over
+    `logtostderr`.
+
+!!! tip "Logging only to the console"
+    With `logtostderr` or `logtostdout` set, no logfiles are created, so all
+    messages go to the console only. This suits applications whose console
+    output is already collected, for instance in a container:
+
+    ``` bash
+    GLOG_logtostdout=1 ./your_application
+    ```
+
+    `alsologtostderr` (`bool`, default=`false`) instead logs to `stderr` in
+    addition to the logfiles.
+
 `stderrthreshold` (`int`, default=2, which is `ERROR`)
 
 :   Copy log messages at or above this level to `stderr` in addition to
