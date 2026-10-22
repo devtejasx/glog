@@ -1629,3 +1629,26 @@ TEST(Logging, FatalThrow) {
   ScopedExit<decltype(restore_fail)> restore{restore_fail};
   EXPECT_THROW({ LOG(FATAL) << "must throw to fail"; }, std::logic_error);
 }
+
+class MessageCollectingSink : public LogSink {
+ public:
+  vector<string> messages;
+  void send(LogSeverity /*severity*/, const char* /*full_filename*/,
+            const char* /*base_filename*/, int /*line*/,
+            const LogMessageTime& /*time*/, const char* message,
+            size_t message_len) override {
+    messages.emplace_back(message, message_len);
+  }
+};
+
+// An empty message without a prefix used to read the byte before its buffer
+// to check for a trailing newline.
+TEST(Logging, EmptyMessageWithoutPrefixIsSentAsEmptyMessage) {
+  MessageCollectingSink sink;
+  {
+    LogMessage message(__FILE__, LogMessage::kNoLogPrefix, GLOG_INFO, &sink,
+                       /*also_send_to_log=*/false);
+  }
+  ASSERT_EQ(sink.messages.size(), 1U);
+  EXPECT_EQ(sink.messages[0], "");
+}
