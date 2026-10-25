@@ -220,8 +220,12 @@ inline namespace glog_internal_namespace_ {
 
 const char* const_basename(const char* filepath) {
   const char* base = strrchr(filepath, '/');
-#ifdef GLOG_OS_WINDOWS  // Look for either path separator in Windows
-  if (!base) base = strrchr(filepath, '\\');
+#ifdef GLOG_OS_WINDOWS
+  // Windows accepts either separator, also mixed within one path.
+  const char* const backslash = strrchr(filepath, '\\');
+  if (backslash != nullptr && (base == nullptr || backslash > base)) {
+    base = backslash;
+  }
 #endif
   return base ? (base + 1) : filepath;
 }

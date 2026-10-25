@@ -44,6 +44,18 @@ TEST(utilities, InitGoogleLoggingDeathTest) {
   ASSERT_DEATH(InitGoogleLogging("foobar"), "");
 }
 
+TEST(utilities, BasenameFollowsTheLastSeparator) {
+  EXPECT_STREQ(glog_internal_namespace_::const_basename("dir/file.cc"),
+               "file.cc");
+  EXPECT_STREQ(glog_internal_namespace_::const_basename("file.cc"), "file.cc");
+#ifdef GLOG_OS_WINDOWS
+  EXPECT_STREQ(glog_internal_namespace_::const_basename("C:\\src/sub\\file.cc"),
+               "file.cc");
+  EXPECT_STREQ(glog_internal_namespace_::const_basename("./build\\app.exe"),
+               "app.exe");
+#endif
+}
+
 int main(int argc, char** argv) {
   InitGoogleLogging(argv[0]);
   InitGoogleTest(&argc, argv);
